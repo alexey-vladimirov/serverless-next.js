@@ -468,7 +468,10 @@ class NextjsComponent extends Component {
 
     const defaultCloudfrontInputs =
       (inputs.cloudfront && inputs.cloudfront.defaults) || {};
-    const cloudFrontOutputs = await cloudFront({
+    const customOrigins =
+      (inputs.cloudfront && inputs.cloudfront.origins) || [];
+
+    const cloudFrontConfig = {
       defaults: {
         ttl: 0,
         allowedHttpMethods: ["HEAD", "GET"],
@@ -483,8 +486,9 @@ class NextjsComponent extends Component {
           "origin-request": `${defaultEdgeLambdaOutputs.arn}:${defaultEdgeLambdaPublishOutputs.version}`
         }
       },
-      origins: cloudFrontOrigins
-    });
+      origins: [...cloudFrontOrigins, ...customOrigins]
+    };
+    const cloudFrontOutputs = await cloudFront(cloudFrontConfig);
 
     let appUrl = cloudFrontOutputs.url;
 
